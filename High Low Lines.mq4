@@ -9,6 +9,38 @@
 #property indicator_chart_window
 #property indicator_buffers 0
 
+class CHorizontalLine {
+public:
+   void Init(string name, int style) {
+      if (name_ != NULL)
+         Delete();
+      name_ = name;
+      style_ = style;
+   }
+
+   void SetPrice(double price) {
+      if (price_ == price)
+         return;
+      price_ = price;
+
+      long chart = 0;
+      if (ObjectSetDouble(chart, name_, OBJPROP_PRICE, price))
+         return;
+      ObjectCreate(chart, name_, OBJ_HLINE, 0, 0, price);
+      ObjectSetInteger(chart, name_, OBJPROP_COLOR, clrWhite);
+      ObjectSetInteger(chart, name_, OBJPROP_STYLE, style_);
+   }
+
+   void Delete() {
+      ObjectDelete(name_);
+   }
+
+private:
+   string name_;
+   double price_;
+   int style_;
+};
+
 class CHighLowLines {
 public:
    static void Add(string name, int period, int shift, int style) {
@@ -18,11 +50,10 @@ public:
    }
 
    void Init(string name, int period, int shift, int style) {
-      name_ = name;
+      high_.Init(name + " High", style);
+      low_.Init(name + " Low", style);
       period_ = period;
       shift_ = shift;
-      style_ = style;
-      Delete();
    }
 
    static void TickAll() {
@@ -31,17 +62,8 @@ public:
    }
 
    void Tick() {
-      Update(name_ + " High", iHigh(NULL, period_, shift_));
-      Update(name_ + " Low", iLow(NULL, period_, shift_));
-   }
-
-   void Update(string name, double price) {
-      long chart = 0;
-      if (ObjectSetDouble(chart, name, OBJPROP_PRICE, price))
-         return;
-      ObjectCreate(chart, name, OBJ_HLINE, 0, 0, price);
-      ObjectSetInteger(chart, name, OBJPROP_COLOR, clrWhite);
-      ObjectSetInteger(chart, name, OBJPROP_STYLE, style_);
+      high_.SetPrice(iHigh(NULL, period_, shift_));
+      low_.SetPrice(iLow(NULL, period_, shift_));
    }
 
    ~CHighLowLines() {
@@ -54,15 +76,15 @@ public:
    }
 
    void Delete() {
-      ObjectDelete(name_ + " High");
-      ObjectDelete(name_ + " Low");
+      high_.Delete();
+      low_.Delete();
    }
 
 private:
-   string name_;
+   CHorizontalLine high_;
+   CHorizontalLine low_;
    int period_;
    int shift_;
-   int style_;
 };
 
 CHighLowLines high_low_lines[];
