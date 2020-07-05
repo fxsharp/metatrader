@@ -22,6 +22,7 @@ extern double AlertRatio = 0;
 #property indicator_color3 DeepSkyBlue
 #property indicator_style3 STYLE_DASH
 #property indicator_color4 Yellow
+#property indicator_width2 2
 #property indicator_color5 DeepSkyBlue
 #property indicator_style5 STYLE_DASH
 #property indicator_color6 DeepSkyBlue
