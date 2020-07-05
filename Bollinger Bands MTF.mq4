@@ -15,33 +15,33 @@ extern double AlertRatio = 0;
 #property indicator_chart_window
 #property indicator_buffers 16
 
-#property indicator_color1 Blue
+#property indicator_color1 DarkGreen
 #property indicator_width1 2
 #property indicator_color2 DeepSkyBlue
 #property indicator_width2 2
 #property indicator_color3 DeepSkyBlue
-#property indicator_style3 STYLE_DOT
+#property indicator_style3 STYLE_DASH
 #property indicator_color4 Yellow
 #property indicator_color5 DeepSkyBlue
-#property indicator_style5 STYLE_DOT
+#property indicator_style5 STYLE_DASH
 #property indicator_color6 DeepSkyBlue
 #property indicator_width6 2
-#property indicator_color7 Blue
+#property indicator_color7 DarkGreen
 #property indicator_width7 2
+#property indicator_color8 Yellow
+#property indicator_style8 STYLE_DASH
 
-#property indicator_color9 Blue
-#property indicator_width9 2
-#property indicator_color10 DeepSkyBlue
-#property indicator_width10 2
+#property indicator_color10 DarkGreen
 #property indicator_color11 DeepSkyBlue
-#property indicator_style11 STYLE_DOT
-#property indicator_color12 Yellow
-#property indicator_color13 DeepSkyBlue
-#property indicator_style13 STYLE_DOT
+#property indicator_color12 DeepSkyBlue
+#property indicator_style12 STYLE_DASH
+#property indicator_color13 Yellow
 #property indicator_color14 DeepSkyBlue
-#property indicator_width14 2
-#property indicator_color15 Blue
-#property indicator_width15 2
+#property indicator_style14 STYLE_DASH
+#property indicator_color15 DeepSkyBlue
+#property indicator_color16 DarkGreen
+#property indicator_color17 Yellow
+#property indicator_style17 STYLE_DASH
 
 int max(int v1, int v2) { return v1 > v2 ? v1 : v2; }
 
@@ -92,7 +92,7 @@ public:
       int band_index = ArraySize(bands);
       ArrayResize(bands, band_index + 1);
       bands[band_index].SetMinutes(minutes);
-      bands[band_index].Init(band_index * 8);
+      bands[band_index].Init(band_index * 9);
       return band_index;
    }
 
@@ -123,12 +123,18 @@ public:
       InitIndex(index_base + 1, BandBufferU2, StringConcatenate(prefix, "+", f2, ")"));
       InitIndex(index_base + 0, BandBufferU3, StringConcatenate(prefix, "+", f3, ")"));
 
-      SetIndexStyle(index_base + 7, DRAW_NONE);
-      SetIndexBuffer(index_base + 7, WidthBuffer);
+      InitIndex(index_base + 7, MASlowBuffer, prefix + "slow)");
+      int shift = -MAPeriod;
+      if (tfsrc > Period())
+         shift = shift * tfsrc / Period();
+      SetIndexShift(index_base + 7, shift);
+
+      SetIndexStyle(index_base + 8, DRAW_NONE);
+      SetIndexBuffer(index_base + 8, WidthBuffer);
       if (ATR > 0)
-         SetIndexLabel(index_base + 7, StringConcatenate("ATR(", tfname, ATR, ")"));
+         SetIndexLabel(index_base + 8, StringConcatenate("ATR(", tfname, ATR, ")"));
       else
-         SetIndexLabel(index_base + 7, StringConcatenate("StdDev(", tfname, MAPeriod, ")"));
+         SetIndexLabel(index_base + 8, StringConcatenate("StdDev(", tfname, MAPeriod, ")"));
    }
 
    void InitIndex(int index, double& buffer[], const string label) {
@@ -193,7 +199,7 @@ public:
          double u3 = ma + value3;
          double l3 = ma - value3;
          for (; ; ) {
-            MABuffer[ibar] = ma;
+            MABuffer[ibar] = MASlowBuffer[ibar] = ma;
             BandBufferU1[ibar] = u1;
             BandBufferL1[ibar] = l1;
             BandBufferU2[ibar] = u2;
@@ -242,6 +248,7 @@ private:
    double BandBufferL2[];
    double BandBufferL3[];
    double WidthBuffer[];
+   double MASlowBuffer[];
    double last_ratio_;
    bool was_out_;
 };
