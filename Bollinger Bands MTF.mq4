@@ -13,7 +13,7 @@ extern bool Fibonacci = false;
 extern double AlertRatio = 0;
 
 #property indicator_chart_window
-#property indicator_buffers 16
+#property indicator_buffers 18
 
 #property indicator_color1 DarkGreen
 #property indicator_width1 2
