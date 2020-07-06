@@ -6,54 +6,44 @@
 #property copyright "Copyright (c) 2020 fxsharp"
 #property link      "https://github.com/fxsharp/metatrader"
 
+int ArrowHigh = 167;
+int ArrowLow = ArrowHigh;
+int LastArrowHigh = 167;
+int LastArrowLow = LastArrowHigh;
+
 #property indicator_chart_window
-#property indicator_buffers 0
+#property indicator_buffers 8
 
-class CHorizontalLine {
-public:
-   void Init(string name, int style) {
-      if (name_ != NULL)
-         Delete();
-      name_ = name;
-      style_ = style;
-   }
+#property indicator_color1 Red
+#property indicator_color2 Lime
+#property indicator_color3 Red
+#property indicator_color4 Lime
+#property indicator_color5 Red
+#property indicator_color6 Lime
+#property indicator_color7 Red
+#property indicator_color8 Lime
 
-   void SetPrice(double price) {
-      if (price_ == price)
-         return;
-      price_ = price;
-
-      long chart = 0;
-      if (ObjectSetDouble(chart, name_, OBJPROP_PRICE, price))
-         return;
-      ObjectCreate(chart, name_, OBJ_HLINE, 0, 0, price);
-      ObjectSetInteger(chart, name_, OBJPROP_COLOR, clrWhite);
-      ObjectSetInteger(chart, name_, OBJPROP_STYLE, style_);
-   }
-
-   void Delete() {
-      ObjectDelete(name_);
-   }
-
-private:
-   string name_;
-   double price_;
-   int style_;
-};
+int min(int v1, int v2) { return v1 < v2 ? v1 : v2; }
 
 class CHighLowLines {
 public:
-   static void Add(string name, int period, int shift, int style) {
+   static void Add(string name, int period, int shift, int arrow_high, int arrow_low) {
       int index = ArraySize(high_low_lines);
       ArrayResize(high_low_lines, index + 1);
-      high_low_lines[index].Init(name, period, shift, style);
+      high_low_lines[index].Init(index * 2, name, period, shift, arrow_high, arrow_low);
    }
 
-   void Init(string name, int period, int shift, int style) {
-      high_.Init(name + " High", style);
-      low_.Init(name + " Low", style);
+   void Init(int index, string name, int period, int shift, int arrow_high, int arrow_low) {
       period_ = period;
       shift_ = shift;
+      SetIndexBuffer(index, HighBuffer);
+      SetIndexBuffer(index + 1, LowBuffer);
+      SetIndexLabel(index, name + " High");
+      SetIndexLabel(index + 1, name + " Low");
+      SetIndexStyle(index, DRAW_ARROW);
+      SetIndexStyle(index + 1, DRAW_ARROW);
+      SetIndexArrow(index, arrow_high);
+      SetIndexArrow(index + 1, arrow_low);
    }
 
    static void TickAll() {
@@ -62,27 +52,29 @@ public:
    }
 
    void Tick() {
-      high_.SetPrice(iHigh(NULL, period_, shift_));
-      low_.SetPrice(iLow(NULL, period_, shift_));
-   }
+      int counted_bars = IndicatorCounted();
+      int ibar = Bars - counted_bars;
+      for (--ibar; ibar >= 0; ) {
+         datetime time = Time[ibar];
+         int ibar_in_period = iBarShift(NULL, period_, time);
+         double high = iHigh(NULL, period_, ibar_in_period + shift_);
+         double low = iLow(NULL, period_, ibar_in_period + shift_);
 
-   ~CHighLowLines() {
-      Delete();
-   }
-
-   static void DeleteAll() {
-      for (int i = 0; i < ArraySize(high_low_lines); i++)
-         high_low_lines[i].Delete();
-   }
-
-   void Delete() {
-      high_.Delete();
-      low_.Delete();
+         datetime time_min = iTime(NULL, period_, ibar_in_period);
+         datetime time_lim = time_min + period_ * 60;
+         int ibar_min = iBarShift(NULL, 0, time_lim);
+         int ibar_lim = iBarShift(NULL, 0, time_min);
+         for (int i = ibar_min; i < ibar_lim; ++i) {
+            HighBuffer[i] = high;
+            LowBuffer[i] = low;
+         }
+         ibar = min(ibar_min - 1, ibar - 1);
+      }
    }
 
 private:
-   CHorizontalLine high_;
-   CHorizontalLine low_;
+   double HighBuffer[];
+   double LowBuffer[];
    int period_;
    int shift_;
 };
@@ -93,16 +85,16 @@ CHighLowLines high_low_lines[];
 //| Custom indicator initialization function                         |
 //+------------------------------------------------------------------+
 int init() {
-   CHighLowLines::Add("Yesterday's", PERIOD_D1, 1, STYLE_DASH);
-   CHighLowLines::Add("This week's", PERIOD_W1, 0, STYLE_DASHDOT);
-   CHighLowLines::Add("Last Week's", PERIOD_W1, 1, STYLE_DOT);
+   CHighLowLines::Add("Today's", PERIOD_D1, 0, ArrowHigh, ArrowLow);
+   CHighLowLines::Add("Yesterday's", PERIOD_D1, 1, LastArrowHigh, LastArrowLow);
+   CHighLowLines::Add("This week's", PERIOD_W1, 0, ArrowHigh, ArrowLow);
+   CHighLowLines::Add("Last Week's", PERIOD_W1, 1, LastArrowHigh, LastArrowLow);
    return(0);
 }
 //+------------------------------------------------------------------+
 //| Custom indicator deinitialization function                       |
 //+------------------------------------------------------------------+
 int deinit() {
-   CHighLowLines::DeleteAll();
    return(0);
 }
 //+------------------------------------------------------------------+
