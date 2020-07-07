@@ -1,5 +1,7 @@
 # High Low Lines
 
+<img src="images/High Low Lines.png" title="High Low Lines">
+
 Shows high and low prices of:
 * Today.
 * Yesterday.
