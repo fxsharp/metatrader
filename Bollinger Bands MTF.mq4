@@ -57,6 +57,8 @@ public:
       name_ = NULL;
    }
 
+   int Seconds() const { return minutes_ * 60; }
+
    string ToString() {
       if (name_ != NULL)
          return name_;
@@ -151,10 +153,9 @@ public:
    }
 
    void Tick() {
-      int counted_bars = IndicatorCounted();
-      int ibarLim = Bars - counted_bars;
       string symbol = Symbol();
-      int ibar = ibarLim - 1;
+      int counted_bars = IndicatorCounted();
+      int ibar = Bars - counted_bars - 1;
       int ibarsrc;
       int tfsrc = timeframe_.Minutes();
       if (tfsrc == 0 || tfsrc <= Period()) {
@@ -185,21 +186,23 @@ public:
             value2 = value * 2;
             value3 = value * 3;
          }
-
-         ibarsrc--;
-         if (tfsrc > 0) {
-            if (ibarsrc < 0)
-               tmsrc = Time[0] + 1;
-            else
-               tmsrc = iTime(symbol, tfsrc, ibarsrc);
-         }
          double u1 = ma + value1;
          double l1 = ma - value1;
          double u2 = ma + value2;
          double l2 = ma - value2;
          double u3 = ma + value3;
          double l3 = ma - value3;
-         for (; ; ) {
+
+         ibarsrc--;
+         int ibar_min = ibar;
+         if (tfsrc > Period()) {
+            if (ibarsrc < 0)
+               tmsrc = Time[0] + 1;
+            else
+               tmsrc = iTime(symbol, tfsrc, ibarsrc);
+            ibar_min = iBarShift(symbol, 0, tmsrc);
+         }
+         for (; ibar >= ibar_min; --ibar) {
             MABuffer[ibar] = MASlowBuffer[ibar] = ma;
             BandBufferU1[ibar] = u1;
             BandBufferL1[ibar] = l1;
@@ -208,10 +211,6 @@ public:
             BandBufferU3[ibar] = u3;
             BandBufferL3[ibar] = l3;
             WidthBuffer[ibar] = value;
-
-            ibar--;
-            if (ibar < 0 || tfsrc <= 0 || Time[ibar] >= tmsrc)
-               break;
          }
       }
 
