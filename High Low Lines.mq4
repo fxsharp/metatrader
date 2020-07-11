@@ -12,7 +12,7 @@ int LastArrowHigh = 167;
 int LastArrowLow = LastArrowHigh;
 
 #property indicator_chart_window
-#property indicator_buffers 8
+#property indicator_buffers 12
 
 #property indicator_color1 Red
 #property indicator_color2 Lime
@@ -22,6 +22,10 @@ int LastArrowLow = LastArrowHigh;
 #property indicator_color6 Lime
 #property indicator_color7 Red
 #property indicator_color8 Lime
+#property indicator_color9 Red
+#property indicator_color10 Lime
+#property indicator_color11 Red
+#property indicator_color12 Lime
 
 int min(int v1, int v2) { return v1 < v2 ? v1 : v2; }
 
@@ -61,9 +65,13 @@ public:
          double low = iLow(NULL, period_, ibar_in_period + shift_);
 
          datetime time_min = iTime(NULL, period_, ibar_in_period);
-         datetime time_lim = time_min + period_ * 60;
-         int ibar_min = iBarShift(NULL, 0, time_lim);
          int ibar_lim = iBarShift(NULL, 0, time_min);
+         if (ibar_in_period > 0) {
+            datetime time_lim = iTime(NULL, period_, ibar_in_period - 1);
+            int ibar_min = iBarShift(NULL, 0, time_lim);
+         } else {
+            ibar_min = 0;
+         }
          for (int i = ibar_min; i < ibar_lim; ++i) {
             HighBuffer[i] = high;
             LowBuffer[i] = low;
@@ -89,6 +97,8 @@ int init() {
    CHighLowLines::Add("Yesterday's", PERIOD_D1, 1, LastArrowHigh, LastArrowLow);
    CHighLowLines::Add("This week's", PERIOD_W1, 0, ArrowHigh, ArrowLow);
    CHighLowLines::Add("Last Week's", PERIOD_W1, 1, LastArrowHigh, LastArrowLow);
+   CHighLowLines::Add("This month's", PERIOD_MN1, 0, ArrowHigh, ArrowLow);
+   CHighLowLines::Add("Last month's", PERIOD_MN1, 1, LastArrowHigh, LastArrowLow);
    return(0);
 }
 //+------------------------------------------------------------------+

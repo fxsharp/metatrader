@@ -2,13 +2,16 @@
 
 <img src="images/High Low Lines.png" title="High Low Lines">
 
-Shows high and low prices of:
-* Today.
-* Yesterday.
-* This week.
-* Last week.
+This MetaTrader 4 custom indicator shows
+daily, weekly, and monthly high and low prices.
 
-Day's high/low liens last two days,
-and week's high/low lines last two weeks.
+Red lines show the highest prices
+for the day and for the week,
+while green lines show the lowest prices.
 
-You can change color and width of lines in the **Colors** tab.
+In order to see
+yesterday's high/low and last week's high/low,
+each line lasts two periods;
+two days for the day's high/low,
+two weeks for the week's high/low,
+and two months for the month's high/low.
