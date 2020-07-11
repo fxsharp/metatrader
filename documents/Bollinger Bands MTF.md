@@ -1,6 +1,7 @@
 # Bollinger Bands MTF
 
-Bollinger Bands with multiple timeframe support.
+This MetaTrader 4 custom indicator shows
+Bollinger Bands in multiple timeframes on single chart.
 Features:
 * Can show up to 2 timeframes.
 * Shows Slow MA.
