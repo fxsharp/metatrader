@@ -7,6 +7,26 @@
 #property strict
 #property indicator_chart_window
 
+class CDrawingObject {
+public:
+   CDrawingObject(string name)
+      : name_(name),
+        type_(ObjectType(name)) {}
+
+   int Type() const { return type_; }
+   string Name() const { return name_; }
+
+   double Price1() const { return ObjectGetDouble(0, name_, OBJPROP_PRICE1); }
+
+   double ValueByTime(datetime time, int line_id = 0) const {
+      return ObjectGetValueByTime(0, name_, time, line_id);
+   }
+
+private:
+   int type_;
+   string name_;
+};
+
 class CRangeAlert {
 public:
    void Tick(datetime time, double price) {
@@ -25,9 +45,9 @@ public:
       current_price_ = price;
 
       if (price >= max_price_) {
-         Alert("Touches upper line: ", max_name_);
+         Alert(Symbol(), ": ", price, " touches \"", max_name_, "\"");
       } else if (price <= min_price_) {
-         Alert("Touches lower line: ", min_name_);
+         Alert(Symbol(), ": ", price, " touches \"", min_name_, "\"");
       } else {
          return;
       }
@@ -39,33 +59,31 @@ public:
       max_price_ = DBL_MAX;
       int count = ObjectsTotal();
       for (int i = 0; i < count; ++i) {
-         string name = ObjectName(i);
-         int type = ObjectType(name);
-         switch (type) {
+         CDrawingObject obj(ObjectName(i));
+         switch (obj.Type()) {
          case OBJ_HLINE:
-            Update(ObjectGetDouble(0, name, OBJPROP_PRICE1), name);
+            Update(obj.Price1(), obj.Name());
             break;
          case OBJ_TREND:
-            UpdateFromTrendLine(name, 0);
+            Update(obj.ValueByTime(current_time_), obj.Name());
             break;
          case OBJ_CHANNEL:
-            UpdateFromTrendLine(name, 0);
-            UpdateFromTrendLine(name, 1);
+            Update(obj.ValueByTime(current_time_, 0), obj.Name());
+            Update(obj.ValueByTime(current_time_, 1), obj.Name());
             break;
          default:
 #ifdef _DEBUG
-            PrintFormat("Object \"%s\" ignored (type=%d)", name, type);
+            PrintFormat("Object \"%s\" ignored (type=%d)", obj.Name(), obj.Type());
 #endif
             break;
          }
       }
+#ifdef _DEBUG
+      PrintFormat("Updated: min=%lf, max=%lf", min_price_, max_price_);
+#endif
 
       if (min_price_ == DBL_MIN && max_price_ == DBL_MAX)
          suppress_until_ = current_time_;
-   }
-
-   void UpdateFromTrendLine(string name, int line_id) {
-      Update(ObjectGetValueByTime(0, name, current_time_, line_id), name);
    }
 
    void Update(double price, string name) {
@@ -83,8 +101,8 @@ public:
    }
 
 private:
-   datetime current_time_;
    datetime suppress_until_;
+   datetime current_time_;
    double current_price_;
    double min_price_;
    double max_price_;
