@@ -26,14 +26,24 @@ int LastArrowLow = LastArrowHigh;
 #property indicator_color10 Lime
 #property indicator_color11 Red
 #property indicator_color12 Lime
+#property indicator_width1 1
+#property indicator_width2 1
+#property indicator_width3 1
+#property indicator_width4 1
+#property indicator_width5 1
+#property indicator_width6 1
+#property indicator_width7 1
+#property indicator_width8 1
+#property indicator_width9 1
+#property indicator_width10 1
+#property indicator_width11 1
+#property indicator_width12 1
 
 int min(int v1, int v2) { return v1 < v2 ? v1 : v2; }
 
 class CHighLowLines {
 public:
-   static void Add(string name, int period, int shift, int arrow_high, int arrow_low) {
-      int index = ArraySize(high_low_lines);
-      ArrayResize(high_low_lines, index + 1);
+   static void Add(int index, string name, int period, int shift, int arrow_high, int arrow_low) {
       high_low_lines[index].Init(index * 2, name, period, shift, arrow_high, arrow_low);
    }
 
@@ -56,6 +66,8 @@ public:
    }
 
    void Tick() {
+      if (period_ <= 0)
+         return;
       int counted_bars = IndicatorCounted();
       int ibar = Bars - counted_bars;
       for (--ibar; ibar >= 0; ) {
@@ -87,18 +99,23 @@ private:
    int shift_;
 };
 
-CHighLowLines high_low_lines[];
+CHighLowLines high_low_lines[12];
 
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
 //+------------------------------------------------------------------+
 int init() {
-   CHighLowLines::Add("Today's", PERIOD_D1, 0, ArrowHigh, ArrowLow);
-   CHighLowLines::Add("Yesterday's", PERIOD_D1, 1, LastArrowHigh, LastArrowLow);
-   CHighLowLines::Add("This week's", PERIOD_W1, 0, ArrowHigh, ArrowLow);
-   CHighLowLines::Add("Last Week's", PERIOD_W1, 1, LastArrowHigh, LastArrowLow);
-   CHighLowLines::Add("This month's", PERIOD_MN1, 0, ArrowHigh, ArrowLow);
-   CHighLowLines::Add("Last month's", PERIOD_MN1, 1, LastArrowHigh, LastArrowLow);
+   int period = Period();
+   if (period < PERIOD_D1) {
+      CHighLowLines::Add(0, "Today's", PERIOD_D1, 0, ArrowHigh, ArrowLow);
+      CHighLowLines::Add(1, "Yesterday's", PERIOD_D1, 1, LastArrowHigh, LastArrowLow);
+   }
+   if (period < PERIOD_W1) {
+      CHighLowLines::Add(2, "This week's", PERIOD_W1, 0, ArrowHigh, ArrowLow);
+      CHighLowLines::Add(3, "Last Week's", PERIOD_W1, 1, LastArrowHigh, LastArrowLow);
+   }
+   CHighLowLines::Add(4, "This month's", PERIOD_MN1, 0, ArrowHigh, ArrowLow);
+   CHighLowLines::Add(5, "Last month's", PERIOD_MN1, 1, LastArrowHigh, LastArrowLow);
    return(0);
 }
 //+------------------------------------------------------------------+
