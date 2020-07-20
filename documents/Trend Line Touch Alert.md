@@ -7,3 +7,9 @@ Following types of lines are supported:
 * Horizontal line.
 * Trendline.
 * Equidistant channel.
+
+Note, this custom indicator checks trendlines on the chart
+when the current bar shifts in the current timeframe,
+or when the current timeframe is changed.
+In order to get alerts right after you drew trendlines and before the next bar appears,
+please change timeframe.
