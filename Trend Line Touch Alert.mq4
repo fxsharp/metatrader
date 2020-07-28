@@ -45,9 +45,9 @@ public:
       current_price_ = price;
 
       if (price >= max_price_) {
-         Alert(Symbol(), ": ", price, " touches \"", max_name_, "\"");
+         Alert(Symbol(), " UP: ", price, " touches \"", max_name_, "\"");
       } else if (price <= min_price_) {
-         Alert(Symbol(), ": ", price, " touches \"", min_name_, "\"");
+         Alert(Symbol(), " DOWN: ", price, " touches \"", min_name_, "\"");
       } else {
          return;
       }
