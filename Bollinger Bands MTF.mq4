@@ -29,7 +29,7 @@ extern double AlertRatio = 0;
 #property indicator_width6 2
 #property indicator_color7 DarkGreen
 #property indicator_width7 2
-#property indicator_color8 Yellow
+#property indicator_color8 Red
 #property indicator_style8 STYLE_DASH
 
 #property indicator_color10 DarkGreen
@@ -41,7 +41,7 @@ extern double AlertRatio = 0;
 #property indicator_style14 STYLE_DASH
 #property indicator_color15 DeepSkyBlue
 #property indicator_color16 DarkGreen
-#property indicator_color17 Yellow
+#property indicator_color17 Red
 #property indicator_style17 STYLE_DASH
 
 int max(int v1, int v2) { return v1 > v2 ? v1 : v2; }

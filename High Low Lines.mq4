@@ -6,9 +6,9 @@
 #property copyright "Copyright (c) 2020 fxsharp"
 #property link      "https://github.com/fxsharp/metatrader"
 
-int ArrowHigh = 167;
+int ArrowHigh = 115;
 int ArrowLow = ArrowHigh;
-int LastArrowHigh = 167;
+int LastArrowHigh = ArrowHigh;
 int LastArrowLow = LastArrowHigh;
 
 #property indicator_chart_window
@@ -60,13 +60,15 @@ public:
       SetIndexArrow(index + 1, arrow_low);
    }
 
+   bool IsInitialized() const { return period_ > 0; }
+
    static void TickAll() {
       for (int i = 0; i < ArraySize(high_low_lines); i++)
          high_low_lines[i].Tick();
    }
 
    void Tick() {
-      if (period_ <= 0)
+      if (!IsInitialized())
          return;
       int counted_bars = IndicatorCounted();
       int ibar = Bars - counted_bars;
