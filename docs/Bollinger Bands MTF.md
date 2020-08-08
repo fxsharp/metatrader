@@ -14,6 +14,7 @@ Features:
 
 <dt>Timeframe</dt>
 <dd>
+
 Comma-separated list of timeframes in minutes.
 Up to two timeframes are used,
 after ignoring timeframe smaller than or equal to
